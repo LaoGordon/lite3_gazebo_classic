@@ -10,13 +10,15 @@ cd ~/ros2_ws
 sudo apt update
 rosdep update
 rosdep install --from-paths src --ignore-src -r -y
-
-## 编译构建 (Build)运行
-
+```
+## 编译运行
+```bash
 cd ~/ros2_ws
 colcon build --symlink-install
 source install/setup.bash
 ros2 launch lite3_description gazebo_classic.launch.py
-
+```
 ## 打开新终端
+```bash
 ros2 run keyboard_input keyboard_input_node
+```
