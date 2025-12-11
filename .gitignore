@@ -1,0 +1,20 @@
+# ROS 2 build folders 
+build/
+install/
+log/
+
+# Python compiled files
+__pycache__/
+*.py[cod]
+
+# C++ compiled files
+*.o
+*.so
+
+# IDE settings 
+.vscode/
+.idea/
+
+# Temporary files
+*~
+*.swp
