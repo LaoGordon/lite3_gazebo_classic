@@ -20,5 +20,7 @@ ros2 launch lite3_description gazebo_classic.launch.py
 ```
 ## 打开新终端
 ```bash
-ros2 run keyboard_input keyboard_input_node
+cd ~/ros2_ws
+. install/setup.bash
+ros2 run keyboard_input keyboard_input 
 ```
