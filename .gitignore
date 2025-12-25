@@ -1,0 +1,65 @@
+# ROS 2 build directories
+build/
+install/
+log/
+
+# Compiled files
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# System files
+.DS_Store
+Thumbs.db
+
+# ROS 2 specific
+*.msg
+*.srv
+*.action
+
+# Binary files
+*.so
+*.dll
+*.exe
+
+# Temporary files
+*~
+*.tmp
+*.temp
+
+# Documentation
+docs/_build/
+
+# Python virtual environment
+venv/
+env/
+ENV/
+
+# Catkin/Colcon
+.catkin_tools/
+.colcon/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+
+# Coverage
+.coverage
+htmlcov/
+
+# Unit test
+*.gcda
+*.gcno
+
+# Logs
+*.log
