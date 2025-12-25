@@ -22,6 +22,8 @@ StateTrotting::StateTrotting(CtrlInterfaces &ctrl_interfaces,
     Kdp = Vec3(10, 10, 10).asDiagonal();
     kp_w_ = 780;
     Kd_w_ = Vec3(70, 70, 70).asDiagonal();
+    // kp_w_ = 400;
+    // Kd_w_ = Vec3(40, 40, 40).asDiagonal();
     Kp_swing_ = Vec3(400, 400, 400).asDiagonal();
     Kd_swing_ = Vec3(10, 10, 10).asDiagonal();
 

@@ -117,7 +117,7 @@ ocs2_quadruped_controller:
 
 unitree_guide_controller:
   ros__parameters:
-    update_rate: 200  # Hz
+    update_rate: 1000  # Hz
 #加上前缀
     command_prefix: "leg_pd_controller"
 

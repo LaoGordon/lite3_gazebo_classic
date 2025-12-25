@@ -11,7 +11,7 @@
   <xacro:property name="leg_offset_y" value="0.062"/>
 
   <!-- hip (left front) -->
-  <xacro:property name="hip_mass" value="0.428"/>
+  <xacro:property name="hip_mass" value="0.5834374645007383"/>
   <xacro:property name="hip_com_x" value="-0.0047"/>
   <xacro:property name="hip_com_y" value="-0.0091"/>
   <xacro:property name="hip_com_z" value="-0.0018"/>
@@ -23,7 +23,7 @@
   <xacro:property name="hip_izz" value="0.00013038"/>
 
   <!-- thigh -->
-  <xacro:property name="thigh_mass" value="0.61"/>
+  <xacro:property name="thigh_mass" value="0.8315347040781551"/>
   <xacro:property name="thigh_com_x" value="-0.00523"/>
   <xacro:property name="thigh_com_y" value="-0.0216"/>
   <xacro:property name="thigh_com_z" value="-0.0273"/>
@@ -35,7 +35,7 @@
   <xacro:property name="thigh_izz" value="2.68E-04"/>
 
   <!-- foot -->
-  <xacro:property name="foot_mass" value="0.06"/>
+  <xacro:property name="foot_mass" value="0.08179029876178574"/>
   <xacro:property name="foot_radius" value="0.013"/>
 
 </robot>

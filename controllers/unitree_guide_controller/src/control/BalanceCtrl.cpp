@@ -20,7 +20,8 @@ BalanceCtrl::BalanceCtrl(const std::shared_ptr<QuadrupedRobot> &robot) {
             friction_ratio_, 0, 0, 1;
 
     pcb_ = Vec3(0.00160, -0.00039, -0.01164);
-    Ib_ = Vec3(0.07416, 0.12086, 0.15067).asDiagonal();
+    // Ib_ = Vec3(0.07416, 0.12086, 0.15067).asDiagonal();
+    Ib_ = Vec3(0.023, 0.042, 0.058).asDiagonal();
 
     Vec6 s;
     Vec12 w, u;
