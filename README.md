@@ -73,8 +73,8 @@ ros2 run keyboard_input keyboard_input
 ### 四足机器人参数调整 
 参数调整一般在const.xacro中调整
 查看整体的urdf文件：
-  ```bash
-  cd ~/ros2_ws
-  source ~/ros2_ws/install/setup.bash
-  ros2 run xacro xacro src/lite3_gazebo_classic/lite3_description/xacro/robot.xacro GAZEBO:=true CLASSIC:=true > src/lite3_gazebo_classic/lite3_description/urdf/robot.urdf
-  ```
+```bash
+cd ~/ros2_ws
+source ~/ros2_ws/install/setup.bash
+ros2 run xacro xacro src/lite3_gazebo_classic/lite3_description/xacro/robot.xacro GAZEBO:=true CLASSIC:=true > src/lite3_gazebo_classic/lite3_description/urdf/robot.urdf
+```
