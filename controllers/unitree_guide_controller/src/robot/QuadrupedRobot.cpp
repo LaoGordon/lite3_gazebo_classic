@@ -5,10 +5,12 @@
 #include <iostream>
 #include "controller_common/CtrlInterfaces.h"
 #include "unitree_guide_controller/robot/QuadrupedRobot.h"
+#include "unitree_guide_controller/robot/KinematicsHelper.h"
 
 QuadrupedRobot::QuadrupedRobot(CtrlInterfaces &ctrl_interfaces, const std::string &robot_description,
                                const std::vector<std::string> &feet_names,
-                               const std::string &base_name) : ctrl_interfaces_(ctrl_interfaces) {
+                               const std::string &base_name,
+                               const std::vector<double> &stand_pos) : ctrl_interfaces_(ctrl_interfaces) {
     KDL::Tree robot_tree;
     kdl_parser::treeFromString(robot_description, robot_tree);
 
@@ -34,8 +36,12 @@ QuadrupedRobot::QuadrupedRobot(CtrlInterfaces &ctrl_interfaces, const std::strin
     for (const auto &[fst, snd]: robot_tree.getSegments()) {
         mass_ += snd.segment.getInertia().getMass();
     }
-    feet_pos_normal_stand_ << 0.184621, 0.184621, -0.164379, -0.164379, -0.157500, 0.157500,
-            -0.157500, 0.157500, -0.318577, -0.318577, -0.318577, -0.318577;
+    // feet_pos_normal_stand_ << 0.184621, 0.184621, -0.164379, -0.164379, -0.157500, 0.157500,
+    //         -0.157500, 0.157500, -0.318577, -0.318577, -0.318577, -0.318577;
+    feet_pos_normal_stand_ = calculateFeetPosNormalStand(robot_legs_, stand_pos);
+    // 打印结果以供验证
+    std::cout << "[QuadrupedRobot] Auto-calculated feet_pos_normal_stand_:\n" 
+              << feet_pos_normal_stand_ << std::endl;
 }
 
 std::vector<KDL::JntArray> QuadrupedRobot::getQ(const std::vector<KDL::Frame> &pEe_list) const {

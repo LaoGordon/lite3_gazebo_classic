@@ -17,7 +17,7 @@ struct CtrlInterfaces;
 class QuadrupedRobot {
 public:
     explicit QuadrupedRobot(CtrlInterfaces &ctrl_interfaces, const std::string &robot_description,
-                            const std::vector<std::string> &feet_names, const std::string &base_name);
+                            const std::vector<std::string> &feet_names, const std::string &base_name,const std::vector<double> &stand_pos);
 
     ~QuadrupedRobot() = default;
 
