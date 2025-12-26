@@ -156,7 +156,7 @@ namespace unitree_guide_controller
             [this](const std_msgs::msg::String::SharedPtr msg)
             {
                 ctrl_component_.robot_model_ = std::make_shared<QuadrupedRobot>(
-                    ctrl_interfaces_, msg->data, feet_names_, base_name_,stand_pos_);
+                    ctrl_interfaces_, msg->data, feet_names_, base_name_, stand_pos_);
                 ctrl_component_.balance_ctrl_ = std::make_shared<BalanceCtrl>(ctrl_component_.robot_model_);
             });
 

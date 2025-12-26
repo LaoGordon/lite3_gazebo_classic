@@ -32,10 +32,23 @@ QuadrupedRobot::QuadrupedRobot(CtrlInterfaces &ctrl_interfaces, const std::strin
     std::cout << "robot_legs_.size(): " << robot_legs_.size() << std::endl;
 
     // calculate total mass from urdf
-    mass_ = 0;
-    for (const auto &[fst, snd]: robot_tree.getSegments()) {
-        mass_ += snd.segment.getInertia().getMass();
-    }
+    // mass_ = 0;
+    // for (const auto &[fst, snd]: robot_tree.getSegments()) {
+    //     mass_ += snd.segment.getInertia().getMass();
+    // }
+
+    // === [新增] 调用 Helper 动态计算 mass_, pcb_, Ib_ ===
+    std::vector<KDL::Chain> chains = {fr_chain_, fl_chain_, rr_chain_, rl_chain_};
+    RobotInertialParams params = calculateRobotDynamics(robot_tree, base_name, chains, stand_pos);
+    
+    this->mass_ = params.mass;
+    this->pcb_  = params.pcb;
+    this->Ib_   = params.Ib;
+
+    // === [新增] 打印结果方便调试 (可选) ===
+    std::cout << "[QuadrupedRobot] Dynamics initialized: Mass=" << mass_ 
+              << ", PCB=" << pcb_.transpose() << std::endl;
+
     // feet_pos_normal_stand_ << 0.184621, 0.184621, -0.164379, -0.164379, -0.157500, 0.157500,
     //         -0.157500, 0.157500, -0.318577, -0.318577, -0.318577, -0.318577;
     feet_pos_normal_stand_ = calculateFeetPosNormalStand(robot_legs_, stand_pos);

@@ -19,11 +19,14 @@ BalanceCtrl::BalanceCtrl(const std::shared_ptr<QuadrupedRobot> &robot) {
     friction_mat_ << 1, 0, friction_ratio_, -1, 0, friction_ratio_, 0, 1, friction_ratio_, 0, -1,
             friction_ratio_, 0, 0, 1;
 
-    pcb_ = Vec3(0.00160, -0.00039, -0.01164);
+    // pcb_ = Vec3(0.00160, -0.00039, -0.01164);
+    pcb_ = robot->pcb_;
+
     // Ib_ = Vec3(0.07416, 0.12086, 0.15067).asDiagonal(); // 旧值，基于约9kg模型
     // Ib_ = Vec3(0.023, 0.042, 0.058).asDiagonal(); // 更旧的值
     // Ib_ = Vec3(0.10, 0.16, 0.20).asDiagonal(); // 近似调整值（增加约35%）
-    Ib_ = Vec3(0.101, 0.164, 0.205).asDiagonal(); // 精确调整值（基于质量增加36.3%线性缩放）
+    // Ib_ = Vec3(0.101, 0.164, 0.205).asDiagonal(); // 精确调整值（基于质量增加36.3%线性缩放）
+    Ib_ = robot->Ib_;
 
     Vec6 s;
     Vec12 w, u;
