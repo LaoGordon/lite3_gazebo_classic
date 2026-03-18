@@ -1,0 +1,6 @@
+navigation:
+  phase: "skeleton"
+  next_steps:
+    - "Connect FAST-LIVO2 odometry and TF into fastlivo_nav_bridge"
+    - "Project filtered 3D obstacle points into 2D floor inputs"
+    - "Integrate Nav2 after single-floor interfaces are stable"

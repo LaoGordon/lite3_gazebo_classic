@@ -1,0 +1,5 @@
+/**:
+  ros__parameters:
+    input_topic: "/obstacle_points"
+    map_topic: "/floor_map"
+    scan_topic: "/scan"
