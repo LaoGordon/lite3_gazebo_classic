@@ -251,7 +251,12 @@ FAST-LIVO2 还会输出配准后的点云，例如 `/cloud_registered`。
 
 ## 当前已经验证了什么
 
-在“先发 `/robot_mode = 2` 让机器人停稳”的前提下，第一步已经重复验证通过。
+截至 2026 年 3 月 24 日，在 Gazebo 仿真环境中已经完成两轮验证：
+
+- 第一轮：接口标准化验证
+- 第二轮：最小 Nav2 闭环验证
+
+第一轮验证中，在“先发 `/robot_mode = 2` 让机器人停稳”的前提下，以下内容已经重复验证通过。
 
 当前已确认：
 
@@ -262,7 +267,19 @@ FAST-LIVO2 还会输出配准后的点云，例如 `/cloud_registered`。
 - `/obstacle_points` 可以正常发布
 - `map -> odom -> base` TF 链可以正常建立
 
-这说明第一步作为“接口打通与标准化”的工作已经成立。
+第二轮验证中，已经进一步确认：
+
+- `floor_mapper` 可以将 `/obstacle_points` 转换为 `/floor_map`
+- `quadruped_nav_bringup` 可以正常拉起 Nav2
+- `planner_server`、`controller_server`、`bt_navigator`、`behavior_server` 可以进入 `active`
+- `/navigate_to_pose` 目标可以被正常接受
+- Nav2 可以输出 `/cmd_vel_nav`
+- 底层主控制链可以继续输出 `/cmd_vel`
+- 机器人在一次近距离目标测试中已实际前进，action 结果返回 `SUCCEEDED`
+
+这说明当前系统已经不只是“接口打通”，而是已经完成一次可运行的最小导航闭环：
+
+`FAST-LIVO2 -> fastlivo_nav_bridge -> floor_mapper -> Nav2 -> /cmd_vel_nav -> /cmd_vel -> robot motion`
 
 ## 当前已实现内容与未实现内容
 
@@ -271,13 +288,11 @@ FAST-LIVO2 还会输出配准后的点云，例如 `/cloud_registered`。
 - 导航层目录结构
 - `fastlivo_nav_bridge` 第一版可工作实现
 - `quadruped_nav_bringup` 统一启动入口
-- `floor_mapper` 骨架
+- `floor_mapper` 第一版 `OccupancyGrid` 投影实现
+- Nav2 最小闭环接入与一次成功验收
 
 当前未实现：
 
-- Nav2 正式接入
-- 点云过滤与投影
-- 2D costmap/occupancy grid 生成
 - 楼梯检测
 - 楼层切换逻辑
 - 局部 3D 通行规划
@@ -295,7 +310,7 @@ colcon build --packages-select fastlivo_nav_bridge floor_mapper quadruped_nav_br
 
 ## 启动方式
 
-当前导航层启动方式：
+当前只启动导航前半链路：
 
 ```bash
 cd /home/longkang/quadruped_ws
@@ -303,59 +318,218 @@ source install/setup.bash
 ros2 launch quadruped_nav_bringup navigation_bringup.launch.py
 ```
 
-注意：这一步默认仿真和 FAST-LIVO2 已经先启动。
+当前完整导航启动方式：
+
+```bash
+cd /home/longkang/quadruped_ws
+source install/setup.bash
+ros2 launch quadruped_nav_bringup navigation_main.launch.py
+```
+
+如果只想验证 bridge 和 `floor_mapper`，可以使用：
+
+```bash
+cd /home/longkang/quadruped_ws
+source install/setup.bash
+ros2 launch quadruped_nav_bringup navigation_main.launch.py enable_nav2:=false
+```
+
+注意：这些步骤默认仿真和 FAST-LIVO2 已经先启动。
 
 ## 当前推荐验证顺序
 
-建议按以下顺序验证当前阶段：
+截至 2026 年 3 月 24 日，当前推荐的最小闭环验证顺序如下。
 
 1. 使用 [run_gazebo.sh](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/run_gazebo.sh) 启动仿真
 2. 发布 `/robot_mode = 2`
 3. 发布零速度 `/cmd_vel`
-4. 等待机器人稳定
+4. 等待机器人稳定后切换到 `/robot_mode = 3`
 5. 启动 FAST-LIVO2
-6. 启动 `quadruped_nav_bringup`
-7. 检查：
+6. 启动完整导航栈 `quadruped_nav_bringup navigation_main.launch.py`
+7. 在机器人仍保持 `mode = 3` 时，检查：
    - `/aft_mapped_to_init`
    - `/cloud_registered`
    - `/odom`
    - `/obstacle_points`
+   - `/floor_map`
    - `map -> odom -> base`
+   - Nav2 核心 lifecycle 节点是否处于 `active`
+8. 在目标和观察终端都准备好后，再快速切换到 `/robot_mode = 4`
+9. 切换到 `mode = 4` 后立刻发送近距离导航目标，例如 `x = 0.3`
+10. 观察：
+   - `/cmd_vel_nav`
+   - `/cmd_vel`
+   - Gazebo 中机器人是否先转向再前进
+
+这里有一个非常重要的控制约束：
+
+- 不要让机器人长时间停留在 `mode = 4` 而不发运动目标
+
+当前控制器在 `TROTTING` 模式下长时间原地保持并不稳定，因此实际联调时必须采用：
+
+- `2 -> 3` 完成准备
+- 先检查感知与导航链路
+- 最后再短时间切换 `4` 并立刻发 goal
 
 这个顺序的意义在于：
 
 - 先稳定仿真
-- 再确认上游定位
-- 最后验证导航接口链
+- 再确认上游定位与地图输入
+- 最后验证完整导航闭环
 
-这样每一层问题都能被清楚定位。
+这样每一层问题都能被清楚定位，同时可以避免机器人在 `mode = 4` 下空站过久导致失衡。
+
+## 已验证命令流程
+
+下面这组命令对应 2026 年 3 月 24 日实际用于完成最小闭环验证的流程。
+
+### 终端 1：启动仿真
+
+```bash
+cd /home/longkang/quadruped_ws
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+bash /home/longkang/quadruped_ws/src/lite3_gazebo_classic/run_gazebo.sh
+```
+
+### 终端 2：先让机器人进入稳定站立准备态
+
+```bash
+cd /home/longkang/quadruped_ws
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+
+ros2 topic pub --once /robot_mode std_msgs/msg/Int32 "{data: 2}"
+ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}"
+sleep 2
+ros2 topic pub --once /robot_mode std_msgs/msg/Int32 "{data: 3}"
+```
+
+### 终端 3：启动 FAST-LIVO2
+
+```bash
+cd /home/longkang/quadruped_ws
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+ros2 launch fast_livo mapping_gazebo.launch.py use_rviz:=false
+```
+
+### 终端 4：启动完整导航栈
+
+```bash
+cd /home/longkang/quadruped_ws
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+ros2 launch quadruped_nav_bringup navigation_main.launch.py
+```
+
+### 终端 5：检查感知与 Nav2 状态
+
+```bash
+cd /home/longkang/quadruped_ws
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+
+ros2 lifecycle get /planner_server
+ros2 lifecycle get /controller_server
+ros2 lifecycle get /bt_navigator
+ros2 lifecycle get /behavior_server
+
+ros2 topic echo /aft_mapped_to_init --once
+ros2 topic echo /cloud_registered --once
+ros2 topic echo /odom --once
+ros2 topic echo /floor_map --once
+```
+
+### 终端 6：观察 Nav2 输出
+
+```bash
+cd /home/longkang/quadruped_ws
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+ros2 topic echo /cmd_vel_nav
+```
+
+### 终端 7：观察底层控制输出
+
+```bash
+cd /home/longkang/quadruped_ws
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+ros2 topic echo /cmd_vel
+```
+
+### 终端 8：切换到 `mode = 4` 并立刻发送目标
+
+```bash
+cd /home/longkang/quadruped_ws
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+
+ros2 topic pub --once /robot_mode std_msgs/msg/Int32 "{data: 4}" && sleep 0.5 && ros2 action send_goal /navigate_to_pose nav2_msgs/action/NavigateToPose '{"pose":{"header":{"frame_id":"map"},"pose":{"position":{"x":0.3,"y":0.0,"z":0.0},"orientation":{"x":0.0,"y":0.0,"z":0.0,"w":1.0}}}}'
+```
+
+### 紧急停止
+
+```bash
+ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}"
+ros2 topic pub --once /robot_mode std_msgs/msg/Int32 "{data: 3}"
+```
+
+## 2026-03-24 实际验证结果
+
+本次验证已经实际确认以下结果：
+
+1. FAST-LIVO2 话题正常
+   - `/aft_mapped_to_init` 正常发布，原始 frame 为 `camera_init -> aft_mapped`
+   - `/cloud_registered` 正常发布
+2. bridge 正常
+   - `/odom` 正常发布，frame 已整理为 `odom -> base`
+3. `floor_mapper` 正常
+   - `/floor_map` 正常发布 `OccupancyGrid`
+4. Nav2 正常
+   - `planner_server`
+   - `controller_server`
+   - `bt_navigator`
+   - `behavior_server`
+   以上节点均进入 `active [3]`
+5. Action 正常
+   - `/navigate_to_pose` 目标可被接受
+6. 控制输出链正常
+   - `/cmd_vel_nav` 有实际线速度和角速度输出
+   - `/cmd_vel` 与 `/cmd_vel_nav` 对应
+7. 机器人实际运动正常
+   - 在一次 `x = 0.3` 的近距离目标测试中，机器人已实际前进
+   - action 返回 `SUCCEEDED`
+
+因此，截至 2026 年 3 月 24 日，已经完成一次成功的最小导航闭环验证。
+
+当前已被实际验证通过的完整链路为：
+
+`FAST-LIVO2 -> fastlivo_nav_bridge -> floor_mapper -> Nav2 -> /cmd_vel_nav -> /cmd_vel -> robot motion`
 
 ## 下一步工作
 
-下一步应当让 `floor_mapper` 从骨架变成真正可工作的模块，把 `fastlivo_nav_bridge` 输出的 3D 障碍点云转换为单层导航可用的输入，为后续 Nav2 接入做准备。
+下一步不再是“是否能接上 Nav2”，而是进入稳定性与重复性验证阶段，重点包括：
+
+- 更远目标与多次重复目标下的稳定性
+- `mode = 4` 下的运行时稳定性
+- 目标容差是否过大导致过早 `SUCCEEDED`
+- 地图与 frame 语义在长时间运行下是否持续稳定
 
 ## 下一步计划
 
-为了让当前导航层继续按可验证、可迭代的方式推进，下一步应优先聚焦在一个明确任务上：
+为了让当前导航层继续按可验证、可迭代的方式推进，后续计划建议拆成“闭环稳定化任务”和“后续阶段任务”两部分。
 
-- 将 `floor_mapper` 从骨架补全为真正可工作的“3D 点云 -> 单层导航输入”模块
-
-这样做的原因是：
-
-- `fastlivo_nav_bridge` 已经把定位和障碍输入接口标准化
-- 当前真正缺失的是单层导航可直接消费的 2D 输入
-- 如果这一层没有先做稳，后续 Nav2 接入会因为输入定义不清而反复返工
-
-因此，后续计划建议拆成“下一步详细任务”和“后续阶段任务”两部分。
-
-### 下一步详细任务：完成 `floor_mapper`
+### 下一步详细任务：稳定最小闭环
 
 这是当前最优先的开发目标。
 
 目标是：
 
-- 将 `/obstacle_points` 转换为单层导航直接可消费的标准 2D 输入
-- 为后续 Nav2 接入建立清晰、稳定的输入契约
+- 让已跑通的最小闭环具备更好的重复性
+- 降低目标被过早判定成功的概率
+- 收敛 `mode = 4` 下的实际运行策略
 
 #### 1. 先收敛 `floor_mapper` 的输出方案
 
