@@ -13,6 +13,7 @@
 | [键盘控制指南](./keyboard_control_guide.md) | 键盘控制使用说明（**新增**） |
 | [故障排除](./troubleshooting.md) | 常见问题及解决方案（**新增**） |
 | [FAST-LIVO2 Rcl 分析](./fastlivo2_rcl_analysis.md) | LiDAR-相机外参分析记录 |
+| [导航闭环验证记录](./navigation_validation_2026_03_24.md) | FAST-LIVO2 到 Nav2 的最小闭环实际验证过程与结果 |
 
 ## 文档更新历史
 
