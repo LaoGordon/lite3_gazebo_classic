@@ -1,5 +1,7 @@
 from launch import LaunchDescription
+from launch.substitutions import PathJoinSubstitution
 from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
@@ -10,9 +12,11 @@ def generate_launch_description():
             name='floor_mapper',
             output='screen',
             parameters=[
-                {'input_topic': '/obstacle_points'},
-                {'map_topic': '/floor_map'},
-                {'scan_topic': '/scan'},
+                PathJoinSubstitution([
+                    FindPackageShare('floor_mapper'),
+                    'config',
+                    'floor_mapper.yaml',
+                ]),
             ],
         )
     ])
