@@ -1,6 +1,7 @@
 navigation:
-  phase: "skeleton"
+  phase: "minimal_closed_loop_validated"
   next_steps:
-    - "Connect FAST-LIVO2 odometry and TF into fastlivo_nav_bridge"
-    - "Project filtered 3D obstacle points into 2D floor inputs"
-    - "Integrate Nav2 after single-floor interfaces are stable"
+    - "Stabilize the minimal closed loop for better repeatability"
+    - "Verify point cloud and TF frame semantics consistency"
+    - "Tune goal tolerance and velocity parameters"
+    - "Establish standard test procedures and regression scripts"
