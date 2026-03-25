@@ -13,10 +13,4 @@ install(
   DESTINATION share/${PROJECT_NAME}
 )
 
-install(
-  PROGRAMS
-    scripts/nav_minimal_check.sh
-  DESTINATION lib/${PROJECT_NAME}
-)
-
 ament_package()
