@@ -24,10 +24,22 @@ colcon build --symlink-install
 
 ### 3. 启动仿真
 
-推荐方式：
+默认空场景：
 
 ```bash
 ./run_gazebo.sh
+```
+
+加载仓库内置 world（默认加载 `quadruped_playground/worlds/test_world.world`）：
+
+```bash
+./run_gazebo_world.sh
+```
+
+加载自定义 Gazebo Classic world：
+
+```bash
+./run_gazebo_world.sh /absolute/path/to/your.world
 ```
 
 手动方式：
@@ -35,8 +47,9 @@ colcon build --symlink-install
 ```bash
 source /usr/share/gazebo/setup.sh
 export GAZEBO_PLUGIN_PATH=$(pwd)/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
+export GAZEBO_MODEL_PATH=$(pwd)/src/lite3_gazebo_classic/libraries/quadruped_playground/models:$GAZEBO_MODEL_PATH
 source install/setup.bash
-ros2 launch lite3_description gazebo_classic.launch.py
+ros2 launch lite3_description gazebo_classic.launch.py world:=$(pwd)/src/lite3_gazebo_classic/libraries/quadruped_playground/worlds/test_world.world
 ```
 
 ### 4. 启动主链遥操作
