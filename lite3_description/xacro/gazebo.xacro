@@ -273,8 +273,8 @@
 
   <xacro:arg name="EXTERNAL_SENSORS" default="false"/>
   <xacro:if value="$(arg EXTERNAL_SENSORS)">
-    <xacro:include filename="$(find gz_quadruped_playground)/models/D435/model.xacro"/>
-    <xacro:include filename="$(find gz_quadruped_playground)/models/Lidar3DV1/model.xacro"/>
+    <xacro:include filename="$(find quadruped_playground)/models/D435/model.xacro"/>
+    <xacro:include filename="$(find quadruped_playground)/models/Lidar3DV1/model.xacro"/>
 
     <xacro:d435 camID="1" name="d435">
       <origin rpy="0 0.1 0" xyz="0.23 0 0.06"/>

@@ -5,42 +5,44 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, OpaqueFunction, IncludeLaunchDescription, RegisterEventHandler, SetEnvironmentVariable
 from launch.event_handlers import OnProcessExit
-from launch.substitutions import PathJoinSubstitution
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+
 
 def launch_setup(context, *args, **kwargs):
 
     package_description = context.launch_configurations['pkg_description']
     init_height = context.launch_configurations['height']
+    world = LaunchConfiguration('world')
     pkg_path = os.path.join(get_package_share_directory(package_description))
 
     xacro_file = os.path.join(pkg_path, 'xacro', 'robot.xacro')
     robot_description = xacro.process_file(xacro_file, mappings={'GAZEBO': 'true', 'CLASSIC': 'true'}).toxml()
 
-    rviz_config_file = os.path.join(get_package_share_directory(package_description), "config", "visualize_urdf.rviz")
+    rviz_config_file = os.path.join(get_package_share_directory(package_description), 'config', 'visualize_urdf.rviz')
 
     rviz = Node(
         package='rviz2',
         executable='rviz2',
         name='rviz_ocs2',
         output='screen',
-        arguments=["-d", rviz_config_file]
+        arguments=['-d', rviz_config_file]
     )
 
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            [PathJoinSubstitution([FindPackageShare("gazebo_ros"), "launch", "gazebo.launch.py"])]
+            [PathJoinSubstitution([FindPackageShare('gazebo_ros'), 'launch', 'gazebo.launch.py'])]
         ),
-        launch_arguments={"verbose": "true"}.items(),
+        launch_arguments={'verbose': 'true', 'world': world}.items(),
     )
 
     spawn_entity = Node(
-        package="gazebo_ros",
-        executable="spawn_entity.py",
-        arguments=["-topic", "robot_description", "-entity", "robot", "-z", init_height],
-        output="screen",
+        package='gazebo_ros',
+        executable='spawn_entity.py',
+        arguments=['-topic', 'robot_description', '-entity', 'robot', '-z', init_height],
+        output='screen',
     )
 
     robot_state_publisher = Node(
@@ -58,34 +60,32 @@ def launch_setup(context, *args, **kwargs):
     )
 
     leg_pd_controller = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["leg_pd_controller",
-                   "--controller-manager", "/controller_manager"],
+        package='controller_manager',
+        executable='spawner',
+        arguments=['leg_pd_controller',
+                   '--controller-manager', '/controller_manager'],
     )
 
     joint_state_publisher = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["joint_state_broadcaster",
-                   "--controller-manager", "/controller_manager"],
+        package='controller_manager',
+        executable='spawner',
+        arguments=['joint_state_broadcaster',
+                   '--controller-manager', '/controller_manager'],
     )
 
     imu_sensor_broadcaster = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["imu_sensor_broadcaster",
-                   "--controller-manager", "/controller_manager"],
+        package='controller_manager',
+        executable='spawner',
+        arguments=['imu_sensor_broadcaster',
+                   '--controller-manager', '/controller_manager'],
     )
 
     unitree_guide_controller = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["unitree_guide_controller", "--controller-manager", "/controller_manager"],
+        package='controller_manager',
+        executable='spawner',
+        arguments=['unitree_guide_controller', '--controller-manager', '/controller_manager'],
     )
 
-    # FASTLIVO2 IMU 话题重映射节点
-    # 将 /imu_sensor_broadcaster/imu 重映射到 /livox/imu
     imu_relay = Node(
         package='topic_tools',
         executable='relay',
@@ -96,22 +96,18 @@ def launch_setup(context, *args, **kwargs):
     )
 
     return [
-        #设置环境变量
         SetEnvironmentVariable(name='QT_QPA_PLATFORM', value='xcb'),
         SetEnvironmentVariable(name='GTK_IM_MODULE', value=''),
         SetEnvironmentVariable(name='QT_IM_MODULE', value=''),
         SetEnvironmentVariable(name='XMODIFIERS', value=''),
-    # Gazebo 插件路径 - Livox 插件 (libros2_livox.so) 必须在此路径中
-    # 启动前请执行：export GAZEBO_PLUGIN_PATH=$(pwd)/install/ros2_livox_simulation/lib:$GAZEBO_PLUGIN_PATH
-    SetEnvironmentVariable(name='GAZEBO_PLUGIN_PATH',
-        value=(os.environ['GAZEBO_PLUGIN_PATH'] if 'GAZEBO_PLUGIN_PATH' in os.environ else '')),
-
+        SetEnvironmentVariable(name='GAZEBO_PLUGIN_PATH',
+            value=(os.environ['GAZEBO_PLUGIN_PATH'] if 'GAZEBO_PLUGIN_PATH' in os.environ else '')),
         rviz,
         robot_state_publisher,
         gazebo,
         spawn_entity,
         leg_pd_controller,
-        imu_relay,  # FASTLIVO2 IMU 重映射
+        imu_relay,
         RegisterEventHandler(
             event_handler=OnProcessExit(
                 target_action=leg_pd_controller,
@@ -122,6 +118,16 @@ def launch_setup(context, *args, **kwargs):
 
 
 def generate_launch_description():
+    world = DeclareLaunchArgument(
+        'world',
+        default_value=PathJoinSubstitution([
+            FindPackageShare('quadruped_playground'),
+            'worlds',
+            'test_world.world',
+        ]),
+        description='Absolute path to the Gazebo Classic world file'
+    )
+
     pkg_description = DeclareLaunchArgument(
         'pkg_description',
         default_value='lite3_description',
@@ -135,6 +141,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        world,
         pkg_description,
         height,
         OpaqueFunction(function=launch_setup),

@@ -21,7 +21,7 @@
       </inertial>
       <visual>
         <geometry>
-          <mesh filename="file://$(find gz_quadruped_playground)/models/Lidar3DV1/meshes/lidar_3d_v1.dae" scale="1 1 1"/>
+          <mesh filename="file://$(find quadruped_playground)/models/Lidar3DV1/meshes/lidar_3d_v1.dae" scale="1 1 1"/>
         </geometry>
       </visual>
     </link>

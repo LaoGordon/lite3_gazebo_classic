@@ -24,7 +24,7 @@
       <visual>
         <origin xyz="0 0 0" rpy="0 0 1.57"/>
         <geometry>
-          <mesh filename="file://$(find gz_quadruped_playground)/models/D435/meshes/realsense.dae" scale="1 1 1"/>
+          <mesh filename="file://$(find quadruped_playground)/models/D435/meshes/realsense.dae" scale="1 1 1"/>
         </geometry>
       </visual>
       <material>
