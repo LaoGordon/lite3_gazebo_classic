@@ -14,6 +14,7 @@
 | [故障排除](./troubleshooting.md) | 常见问题及解决方案（**新增**） |
 | [FAST-LIVO2 Rcl 分析](./fastlivo2_rcl_analysis.md) | LiDAR-相机外参分析记录 |
 | [导航闭环验证记录](./navigation_validation_2026_03_24.md) | FAST-LIVO2 到 Nav2 的最小闭环实际验证过程与结果 |
+| [导航当前状态总结](./navigation_status_2026_03_25.md) | 当前已解决问题、已验证能力和下一步计划 |
 
 ## 文档更新历史
 
