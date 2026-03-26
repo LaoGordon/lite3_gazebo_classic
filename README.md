@@ -8,12 +8,16 @@ Lite3 四足机器人的 Gazebo Classic 仿真环境，支持 ROS 2 Humble。
 
 ```bash
 sudo apt update
-sudo apt install libgoogle-glog-dev
+sudo apt install libgoogle-glog-dev ros-humble-topic-tools
 
 cd ~/quadruped_ws
 rosdep install --from-paths src --ignore-src -r -y
 git submodule update --init --recursive
 ```
+
+说明：
+
+- `ros-humble-topic-tools` 是启动 `gazebo_classic.launch.py` 时必需的运行依赖，用于 `topic_tools/relay` 节点将 `/imu_sensor_broadcaster/imu` 转发到 `/livox/imu`
 
 ### 2. 编译
 
