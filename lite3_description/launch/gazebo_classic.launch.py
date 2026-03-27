@@ -41,7 +41,7 @@ def launch_setup(context, *args, **kwargs):
     spawn_entity = Node(
         package='gazebo_ros',
         executable='spawn_entity.py',
-        arguments=['-topic', 'robot_description', '-entity', 'robot', '-x', '-10.0', '-y', '0.0', '-z', init_height],
+        arguments=['-topic', 'robot_description', '-entity', 'robot', '-x', '-30.0', '-y', '0.0', '-z', init_height],
         output='screen',
     )
 

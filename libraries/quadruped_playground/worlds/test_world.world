@@ -11,7 +11,6 @@
 
     <include>
       <uri>model://test_world</uri>
-      <pose>15.0 5.0 0 0 -0 0</pose>
     </include>
   </world>
 </sdf>
