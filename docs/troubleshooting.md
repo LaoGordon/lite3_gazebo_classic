@@ -278,3 +278,27 @@ ros2 lifecycle list
 1. 查看 GitHub Issues
 2. 提供详细的错误日志
 3. 说明系统环境和复现步骤
+
+---
+
+## 3. 传感器配置问题
+
+### 3.1 相机视野远处的物体（如墙壁）在图像和点云中消失
+
+**问题现象**：
+在 Gazebo 的主窗口（User Camera）中可以正常看到远处的墙壁和物体，但是机器人身上搭载的相机传感器（Sensor Camera）输出的图像和点云中，距离较远的物体却“消失”了。
+
+**原因**：
+机器人模型（URDF 或 SDF 文件）中，相机传感器的 `<far>`（远裁剪面）参数被设置得太小（例如 `10.0` 米）。当物体的距离超过了这个设定的数值时，相机插件就会停止渲染该物体，从而导致它在图像和点云中“消失”。
+
+**解决方案**：
+修改相机和深度相机的 `<far>` 裁剪面参数，将其放大（例如修改为 `300.0` 米）。
+涉及的文件通常包括对应的 xacro 和 sdf 模型文件：
+- `lite3_description/xacro/sensors/d435i_sensor.xacro`
+- `quadruped_playground/models/D435/model.xacro`
+- `quadruped_playground/models/D435/model.sdf`
+
+修改后需要重新编译并使其生效：
+```bash
+colcon build --packages-select lite3_description quadruped_playground --symlink-install
+```

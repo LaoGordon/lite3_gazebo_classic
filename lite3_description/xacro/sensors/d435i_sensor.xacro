@@ -63,7 +63,7 @@
           </image>
           <clip>
             <near>0.1</near>
-            <far>10.0</far>
+            <far>300.0</far>
           </clip>
         </camera>
         <always_on>1</always_on>
