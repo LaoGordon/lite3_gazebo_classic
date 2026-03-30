@@ -11,7 +11,7 @@ def generate_launch_description():
             output='screen',
             parameters=[
                 {'fastlivo_odom_topic': '/aft_mapped_to_init'},
-                {'fastlivo_cloud_topic': '/cloud_registered'},
+                {'fastlivo_cloud_topic': '/cloud_registered_lidar'},
                 {'odom_topic': '/odom'},
                 {'obstacle_topic': '/obstacle_points'},
                 {'map_frame': 'map'},
