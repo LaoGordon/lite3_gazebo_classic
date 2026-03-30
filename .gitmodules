@@ -10,3 +10,4 @@
 [submodule "src/FAST-LIVO2"]
 	path = src/FAST-LIVO2
 	url = https://github.com/LaoGordon/FAST-LIVO2.git
+	branch = nav-lidar
