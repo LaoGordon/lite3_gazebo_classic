@@ -218,4 +218,4 @@ ros2 run keyboard_input keyboard_input --ros-args \
 ## 8. 参考文档
 
 - [传感器配置](./sensor_configuration.md)
-- [控制接口规范](./control_interface_spec.md)
+- [控制接口规范](../references/control_interface_spec.md)

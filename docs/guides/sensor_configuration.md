@@ -221,4 +221,4 @@ ls $(pwd)/install/ros2_livox_simulation/lib/libros2_livox.so
 - 统一 TF 管理方式
 
 ### 参考文档
-- [FAST-LIVO2 Rcl 分析](./fastlivo2_rcl_analysis.md)
+- [FAST-LIVO2 Rcl 分析](../references/fastlivo2_rcl_analysis.md)
