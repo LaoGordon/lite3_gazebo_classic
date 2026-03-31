@@ -79,13 +79,56 @@ ros2 run keyboard_input keyboard_input
 
 ### 5. FAST-LIVO2 使用
 
-在仿真启动后，可在另一个终端启动 FAST-LIVO2：
+在仿真启动后，可在另一个终端启动 FAST-LIVO2。
+
+默认启动：
 
 ```bash
 cd ~/quadruped_ws
 source install/setup.bash
-ros2 launch fast_livo mapping_gazebo.launch.py use_rviz:=True
+ros2 launch fast_livo mapping_gazebo.launch.py
 ```
+
+常用启动参数：
+
+- `use_rviz:=true|false`
+  - 是否同时启动 RViz2
+  - 默认值为 `false`
+- `enable_pcd_save:=true|false`
+  - 是否启用 FAST-LIVO2 原生 PCD 落盘
+  - 默认值为 `false`
+  - 仅在一次性建图、需要导出全局点云时开启
+
+示例：
+
+仅启动 FAST-LIVO2，不开 RViz，不保存 PCD：
+
+```bash
+ros2 launch fast_livo mapping_gazebo.launch.py
+```
+
+启动 FAST-LIVO2 并打开 RViz：
+
+```bash
+ros2 launch fast_livo mapping_gazebo.launch.py use_rviz:=true
+```
+
+启动 FAST-LIVO2 并导出全局 PCD：
+
+```bash
+ros2 launch fast_livo mapping_gazebo.launch.py enable_pcd_save:=true
+```
+
+同时打开 RViz 并导出全局 PCD：
+
+```bash
+ros2 launch fast_livo mapping_gazebo.launch.py use_rviz:=true enable_pcd_save:=true
+```
+
+启用 `enable_pcd_save:=true` 后，FAST-LIVO2 会在退出时输出全局点云到：
+
+- `src/lite3_gazebo_classic/src/FAST-LIVO2/Log/PCD/all_raw_points.pcd`
+- `src/lite3_gazebo_classic/src/FAST-LIVO2/Log/PCD/all_downsampled_points.pcd`
 
 当前仿真链路中：
 
@@ -95,7 +138,8 @@ ros2 launch fast_livo mapping_gazebo.launch.py use_rviz:=True
 
 Rcl 外参分析与结论见：
 
-- [FAST-LIVO2 Rcl 分析](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/fastlivo2_rcl_analysis.md)
+- [FAST-LIVO2 Rcl 分析](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/references/fastlivo2_rcl_analysis.md)
+- [FAST-LIVO2 原生 PCD 落盘说明](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/planning/fastlivo2_pcd_export_guide_2026_03_31.md)
 
 ## 标准控制接口
 
@@ -106,16 +150,16 @@ Rcl 外参分析与结论见：
 
 详细约定见：
 
-- [控制接口规范](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/control_interface_spec.md)
+- [控制接口规范](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/references/control_interface_spec.md)
 
 ## 文档导航
 
 - [文档索引](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/README.md)
-- [控制接口规范](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/control_interface_spec.md)
-- [键盘控制指南](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/keyboard_control_guide.md)
-- [传感器配置](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/sensor_configuration.md)
-- [FAST-LIVO2 Rcl 分析](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/fastlivo2_rcl_analysis.md)
-- [故障排除](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/troubleshooting.md)
+- [控制接口规范](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/references/control_interface_spec.md)
+- [键盘控制指南](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/guides/keyboard_control_guide.md)
+- [传感器配置](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/guides/sensor_configuration.md)
+- [FAST-LIVO2 Rcl 分析](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/references/fastlivo2_rcl_analysis.md)
+- [故障排除](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/guides/troubleshooting.md)
 
 ## 运行环境
 
