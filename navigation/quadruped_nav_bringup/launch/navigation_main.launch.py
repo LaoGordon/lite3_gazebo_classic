@@ -14,6 +14,8 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time')
     params_file = LaunchConfiguration('params_file')
     autostart = LaunchConfiguration('autostart')
+    enable_static_map = LaunchConfiguration('enable_static_map')
+    map_yaml = LaunchConfiguration('map_yaml')
     use_composition = LaunchConfiguration('use_composition')
     use_respawn = LaunchConfiguration('use_respawn')
     log_level = LaunchConfiguration('log_level')
@@ -33,6 +35,16 @@ def generate_launch_description():
         'autostart',
         default_value='true',
         description='Automatically startup the Nav2 lifecycle nodes')
+
+    declare_enable_static_map_cmd = DeclareLaunchArgument(
+        'enable_static_map',
+        default_value='false',
+        description='Launch a minimal static map_server pipeline')
+
+    declare_map_yaml_cmd = DeclareLaunchArgument(
+        'map_yaml',
+        default_value=os.path.join(nav_bringup_dir, 'maps', 'floor_1.yaml'),
+        description='Full path to the static map yaml file')
 
     declare_use_composition_cmd = DeclareLaunchArgument(
         'use_composition',
@@ -60,6 +72,18 @@ def generate_launch_description():
         )
     )
 
+    static_map_cmd = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(nav_bringup_dir, 'launch', 'static_map.launch.py')
+        ),
+        condition=IfCondition(enable_static_map),
+        launch_arguments={
+            'use_sim_time': use_sim_time,
+            'map_yaml': map_yaml,
+            'autostart': autostart,
+        }.items()
+    )
+
     nav2_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(nav2_bringup_dir, 'launch', 'navigation_launch.py')
@@ -80,11 +104,14 @@ def generate_launch_description():
     ld.add_action(declare_use_sim_time_cmd)
     ld.add_action(declare_params_file_cmd)
     ld.add_action(declare_autostart_cmd)
+    ld.add_action(declare_enable_static_map_cmd)
+    ld.add_action(declare_map_yaml_cmd)
     ld.add_action(declare_use_composition_cmd)
     ld.add_action(declare_use_respawn_cmd)
     ld.add_action(declare_log_level_cmd)
     ld.add_action(declare_enable_nav2_cmd)
     ld.add_action(base_infrastructure_launch)
+    ld.add_action(static_map_cmd)
     ld.add_action(nav2_cmd)
 
     return ld

@@ -105,3 +105,66 @@ FAST-LIVO2 退出时的实际输出记录为：
 - 第一版 `floor_1` 已经成功生成
 - 人工观察结果表明输出效果具备继续推进的价值
 - 当前项目已经从“全局点云落盘”进入“静态地图接入 Nav2”的下一阶段
+
+
+## 九、补充验证：`map_server` 与 RViz 加载（2026-04-01）
+
+在第一版静态地图文件生成完成后，又完成了 `map_server` 加载与 RViz 显示验证。
+
+### 1. `map_server` 验证结果
+
+已确认：
+
+- `ros2 lifecycle get /map_server` 返回 `active [3]`
+- `ros2 topic echo /map --once` 能正确收到 `nav_msgs/OccupancyGrid`
+- 实际加载地图文件为安装目录下的：
+  - `install/quadruped_nav_bringup/share/quadruped_nav_bringup/maps/floor_1.pgm`
+
+从实际回显中可以确认：
+
+- `frame_id = map`
+- `resolution = 0.05`
+- `width = 420`
+- `height = 468`
+- `origin = (-9.9, -11.85)`
+
+这说明当前链路已经进一步成立：
+
+`floor_1.pgm/.yaml -> map_server -> /map`
+
+### 2. RViz 调试记录
+
+初次在 RViz 中添加 `Map` display 时，出现了 `No map received`。
+
+后续确认该问题不是 `map_server` 没有发布地图，而是 RViz 订阅 `/map` 时的 QoS 设置不匹配。
+
+有效的修正方式为：
+
+- `Fixed Frame` 设为 `map`
+- `Map` display 的 `Topic` 设为 `/map`
+- `Durability Policy` 设为 `Transient Local`
+
+在此基础上，若 TF 树中暂时没有 `map` frame，还需要额外提供临时 TF，例如：
+
+```bash
+ros2 run tf2_ros static_transform_publisher 0 0 0 0 0 0 map odom
+```
+
+修正后，RViz 已能正常显示静态地图。
+
+### 3. 当前阶段结论更新
+
+截至 2026-04-01，可以进一步确认：
+
+- 第一版静态地图文件不仅已经成功生成，而且已经能被 `map_server` 正常加载
+- `/map` 话题已经可以稳定发布
+- RViz 侧的关键注意事项是：静态地图显示需要将 `Durability Policy` 设置为 `Transient Local`
+- 当前项目已经完成从“离线做图”到“静态地图上线发布”的验证闭环
+
+### 4. 下一步影响
+
+这次补充验证完成后，下一步就不再是“地图能不能发布”，而是：
+
+1. 将 `global_costmap` 从当前过渡配置切回标准 `StaticLayer -> /map`
+2. 验证全局规划器是否真正开始使用这张静态地图
+3. 最后再继续收敛 `map -> odom` 的正式语义

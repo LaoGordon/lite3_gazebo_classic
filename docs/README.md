@@ -24,7 +24,7 @@
 | [导航当前问题记录](./planning/navigation_issues_2026_03_31.md) | 当前已识别的导航架构问题、风险边界与处理顺序 |
 | [静态Map链路设计草案](./planning/static_map_pipeline_design_2026_03_31.md) | 当前从全局点云落盘到 `/map` 接入 Nav2 的设计路径 |
 | [FAST-LIVO2原生PCD落盘说明](./planning/fastlivo2_pcd_export_guide_2026_03_31.md) | 当前原生全局点云导出的参数、路径与推荐使用方式 |
-| [PCD到2D静态地图验证记录](./planning/pcd_to_map_validation_2026_03_31.md) | 第一版离线静态地图生成结果与人工检查结论 |
+| [PCD到2D静态地图验证记录](./planning/pcd_to_map_validation_2026_03_31.md) | 第一版离线静态地图生成、`map_server` 加载与 RViz 调试结论 |
 
 ## 历史验证记录
 
