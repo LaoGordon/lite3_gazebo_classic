@@ -8,7 +8,11 @@ Lite3 四足机器人的 Gazebo Classic 仿真环境，支持 ROS 2 Humble。
 
 ```bash
 sudo apt update
-sudo apt install libgoogle-glog-dev ros-humble-topic-tools
+sudo apt install \
+  libgoogle-glog-dev \
+  ros-humble-topic-tools \
+  ros-humble-navigation2 \
+  ros-humble-nav2-bringup
 
 cd ~/quadruped_ws
 rosdep install --from-paths src --ignore-src -r -y
@@ -18,6 +22,7 @@ git submodule update --init --recursive
 说明：
 
 - `ros-humble-topic-tools` 是启动 `gazebo_classic.launch.py` 时必需的运行依赖，用于 `topic_tools/relay` 节点将 `/imu_sensor_broadcaster/imu` 转发到 `/livox/imu`
+- `ros-humble-navigation2` 与 `ros-humble-nav2-bringup` 是静态地图验证与 Nav2 导航链所需依赖，其中包含 `nav2_map_server`、`nav2_lifecycle_manager` 与 `nav2_bringup`
 
 ### 2. 编译
 
@@ -140,6 +145,52 @@ Rcl 外参分析与结论见：
 
 - [FAST-LIVO2 Rcl 分析](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/references/fastlivo2_rcl_analysis.md)
 - [FAST-LIVO2 原生 PCD 落盘说明](/home/longkang/quadruped_ws/src/lite3_gazebo_classic/docs/planning/fastlivo2_pcd_export_guide_2026_03_31.md)
+
+### 6. 一键导航验证
+
+若你已经生成并保存了静态地图，可直接使用仓库内的一键脚本启动整套验证链。
+
+默认入口：
+
+```bash
+cd ~/quadruped_ws/src/lite3_gazebo_classic
+./run_navigation_validation.sh
+```
+
+该脚本会按顺序启动：
+
+- `run_gazebo_world.sh`
+- FAST-LIVO2
+- `fastlivo_nav_bridge`
+- `static_map.launch.py`
+- 临时 `map -> odom` 静态 TF
+- `navigation_main.launch.py`
+- 导航 RViz
+
+默认使用的静态地图为：
+
+- `navigation/quadruped_nav_bringup/maps/floor_small_test.yaml`
+
+若要指定其他 world，可将 world 文件路径作为第一个参数传入：
+
+```bash
+cd ~/quadruped_ws/src/lite3_gazebo_classic
+./run_navigation_validation.sh /absolute/path/to/your.world
+```
+
+若要调整阶段间等待时间，可通过环境变量修改：
+
+```bash
+cd ~/quadruped_ws/src/lite3_gazebo_classic
+GAZEBO_DELAY=12 FASTLIVO_DELAY=8 BRIDGE_DELAY=5 STATIC_MAP_DELAY=4 NAV2_DELAY=5 ./run_navigation_validation.sh
+```
+
+若不需要自动打开 RViz，可关闭对应窗口：
+
+```bash
+cd ~/quadruped_ws/src/lite3_gazebo_classic
+FASTLIO_RVIZ=false NAV_RVIZ=false ./run_navigation_validation.sh
+```
 
 ## 标准控制接口
 
