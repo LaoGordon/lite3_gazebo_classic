@@ -1,0 +1,110 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+  - Class: rviz_common/Tool Properties
+    Name: Tool Properties
+  - Class: rviz_common/Views
+    Name: Views
+  - Class: rviz_common/Time
+    Name: Time
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Class: rviz_default_plugins/Grid
+      Enabled: true
+      Name: Grid
+      Plane: XY
+      Reference Frame: <Fixed Frame>
+      Cell Size: 1
+      Plane Cell Count: 40
+      Color: 160; 160; 164
+    - Class: rviz_default_plugins/Map
+      Enabled: true
+      Name: Global Costmap
+      Alpha: 0.7
+      Color Scheme: map
+      Draw Behind: false
+      Topic:
+        Value: /global_costmap/costmap
+        Depth: 1
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Durability Policy: Transient Local
+      Update Topic:
+        Value: /global_costmap/costmap_updates
+      Use Timestamp: false
+    - Class: rviz_default_plugins/Map
+      Enabled: false
+      Name: Static Map
+      Alpha: 0.7
+      Color Scheme: map
+      Draw Behind: false
+      Topic:
+        Value: /map
+        Depth: 1
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Durability Policy: Transient Local
+      Update Topic:
+        Value: /map_updates
+      Use Timestamp: false
+    - Class: rviz_default_plugins/TF
+      Enabled: true
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+    - Class: rviz_default_plugins/RobotModel
+      Enabled: true
+      Name: RobotModel
+      Description Topic:
+        Value: /robot_description
+    - Class: rviz_default_plugins/Path
+      Enabled: true
+      Name: Global Path
+      Topic:
+        Value: /plan
+        Depth: 5
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Durability Policy: Volatile
+    - Class: rviz_default_plugins/Path
+      Enabled: true
+      Name: Local Path
+      Topic:
+        Value: /local_plan
+        Depth: 5
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Durability Policy: Volatile
+  Enabled: true
+  Global Options:
+    Background Color: 48; 48; 48
+    Fixed Frame: map
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz_default_plugins/Interact
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/Select
+    - Class: rviz_default_plugins/FocusCamera
+    - Class: rviz_default_plugins/Measure
+    - Class: rviz_default_plugins/SetInitialPose
+      Topic:
+        Value: /initialpose
+    - Class: rviz_default_plugins/SetGoal
+      Topic:
+        Value: /goal_pose
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 28
+      Focal Point:
+        X: 0
+        Y: 0
+        Z: 0
+      Pitch: 0.9
+      Yaw: 0.9
+Window Geometry:
+  Height: 960
+  Width: 1400

@@ -152,6 +152,51 @@ ros2 run tf2_ros static_transform_publisher 0 0 0 0 0 0 map odom
 
 修正后，RViz 已能正常显示静态地图。
 
+### 2.1 补充问题：RViz 显示 `No map received`，但 `/map` 实际已发布
+
+后续复现中又遇到一种更隐蔽的情况：
+
+- `ros2 lifecycle get /map_server` 返回 `active [3]`
+- `ros2 topic echo /map --once` 能正常收到 `nav_msgs/OccupancyGrid`
+- RViz 的 `Map` display 仍然显示 `No map received`
+
+这说明问题不在 `map_server`，而在 RViz 对 `/map` 的实际订阅 QoS。
+
+可使用以下命令确认：
+
+```bash
+ros2 topic info /map -v
+```
+
+若输出表现为：
+
+- `map_server` 发布者：`Durability = TRANSIENT_LOCAL`
+- `rviz` 订阅者：`Durability = VOLATILE`
+
+则可确认根因是：
+
+- RViz 实际仍在用 `VOLATILE` 订阅 `/map`
+- 而 `/map` 是以 `TRANSIENT_LOCAL` 方式发布的
+- 两侧 Durability 不匹配，因此 RViz 即使界面中看起来配置正确，也仍会收不到地图
+
+本次复现中，最稳定的解决方式不是只修改已有 `Map` display 的参数，而是：
+
+1. 删除当前已有的 `Map` display
+2. 重新启动 `rviz2`
+3. 重新添加一个新的 `Map` display
+4. 显式设置：
+   - `Reliability Policy = Reliable`
+   - `Durability Policy = Transient Local`
+   - `History Policy = Keep Last`
+   - `Depth = 1`
+   - `Topic = /map`
+
+经验结论：
+
+- 仅在已有 `Map` display 上修改 QoS，RViz 不一定会真正重建订阅
+- 因此会出现“界面看起来已经改成 `Transient Local`，但 `ros2 topic info /map -v` 中 RViz 实际仍为 `VOLATILE`”的现象
+- 遇到这种情况时，应优先采用“删除 display 或重启 RViz 后重新添加”的方式处理
+
 ### 3. 当前阶段结论更新
 
 截至 2026-04-01，可以进一步确认：
@@ -168,3 +213,104 @@ ros2 run tf2_ros static_transform_publisher 0 0 0 0 0 0 map odom
 1. 将 `global_costmap` 从当前过渡配置切回标准 `StaticLayer -> /map`
 2. 验证全局规划器是否真正开始使用这张静态地图
 3. 最后再继续收敛 `map -> odom` 的正式语义
+
+
+## 十、后续复现补充（2026-04-03）
+
+### 1. 地图文件不要长期放在 `/tmp`
+
+在后续验证中发现，将生成出的 `.pgm/.yaml` 长期放在 `/tmp` 下不够稳妥。
+
+原因包括：
+
+- 系统重启后 `/tmp` 中的文件可能被清理
+- 重新打开 `map_server` 时，若 `map_yaml` 指向 `/tmp` 中已不存在的文件，会直接报错
+- 不利于后续将同一张地图反复用于 `map_server`、Nav2 与文档记录
+
+因此，后续验证中应优先将地图保存到仓库内的统一目录：
+
+- `navigation/quadruped_nav_bringup/maps/`
+
+本次复现中，已将验证地图固化为：
+
+- `navigation/quadruped_nav_bringup/maps/floor_small_test.pgm`
+- `navigation/quadruped_nav_bringup/maps/floor_small_test.yaml`
+- `navigation/quadruped_nav_bringup/maps/floor_small_test_metadata.txt`
+
+后续建议统一使用该仓库内路径，而不是继续依赖 `/tmp/floor_small_test.yaml`。
+
+### 2. 一键验证脚本
+
+为了避免每次验证时分别手动启动 Gazebo、FAST-LIVO2、bridge、静态地图与导航栈，当前已新增一个总入口脚本：
+
+- `run_navigation_validation.sh`
+
+之所以最终采用脚本而不是继续使用单个总 launch，原因是：
+
+- Gazebo Classic 的稳定启动依赖仓库内已经验证可用的 `run_gazebo_world.sh`
+- 该脚本中包含了残留进程清理、共享内存清理与 GUI 环境准备
+- 导航链还需要按顺序分阶段启动，直接一次性拉起所有节点不够稳定
+
+当前脚本会按顺序启动：
+
+1. `run_gazebo_world.sh`
+2. FAST-LIVO2
+3. `fastlivo_nav_bridge`
+4. `static_map.launch.py`
+5. 临时 `map -> odom` 静态 TF
+6. `navigation_main.launch.py`
+7. 导航 RViz
+
+脚本内部在各阶段之间加入了固定延时，以等待 Gazebo、FAST-LIVO2 与 TF 主干逐步稳定。
+
+默认地图文件使用：
+
+- `navigation/quadruped_nav_bringup/maps/floor_small_test.yaml`
+
+使用方式：
+
+```bash
+cd ~/ws/quadruped_ws/src/lite3_gazebo_classic
+./run_navigation_validation.sh
+```
+
+若要显式指定 world，可将 world 文件路径作为第一个参数传入：
+
+```bash
+cd ~/ws/quadruped_ws/src/lite3_gazebo_classic
+./run_navigation_validation.sh /absolute/path/to/your.world
+```
+
+若要调整启动节奏，可通过环境变量修改延时，例如：
+
+```bash
+cd ~/ws/quadruped_ws/src/lite3_gazebo_classic
+GAZEBO_DELAY=12 FASTLIVO_DELAY=8 BRIDGE_DELAY=5 STATIC_MAP_DELAY=4 NAV2_DELAY=5 ./run_navigation_validation.sh
+```
+
+### 3. 关于 `map -> odom` 临时 TF
+
+是的，当前一键脚本中已经内置了你之前手动执行的这条命令：
+
+```bash
+ros2 run tf2_ros static_transform_publisher 0 0 0 0 0 0 map odom
+```
+
+当前用途是：
+
+- 在验证阶段先把 `map -> odom` 以恒等变换接起来
+- 让 `map -> odom -> base` 这条 TF 主干可用于 RViz 和 Nav2 验证
+
+但这仍然只是验证阶段的临时方案，不应视为最终定位语义。
+
+### 4. 当前阶段建议
+
+截至 2026-04-03，后续验证时更推荐采用以下流程：
+
+1. 将静态地图保存在 `navigation/quadruped_nav_bringup/maps/`
+2. 通过 `run_navigation_validation.sh` 一键拉起验证链
+3. 在 RViz 中优先关注：
+   - `/global_costmap/costmap`
+   - 路径规划结果
+   - 机器人是否能沿路径正常运动
+4. 若机器人倒地或状态明显异常，直接整套重启验证链，而不是在污染状态下继续测试
