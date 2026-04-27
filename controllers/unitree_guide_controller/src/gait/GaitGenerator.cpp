@@ -14,7 +14,6 @@ GaitGenerator::GaitGenerator(CtrlComponent &ctrl_component)
       estimator_(ctrl_component.estimator_),
       feet_end_calc_(ctrl_component) {
     first_run_ = true;
-    prev_contact_.setZero();
 }
 
 void GaitGenerator::setGait(Vec2 vxy_goal_global, const double d_yaw_goal, const double gait_height) {
@@ -39,20 +38,16 @@ void GaitGenerator::generate(Vec34 &feet_pos, Vec34 &feet_vel) {
             feet_vel.col(i).setZero();
         } else {
             // foot not contact, swing
-            if (prev_contact_(i) == 1) {
-                end_p_.col(i) = feet_end_calc_.calcFootPos(i, vxy_goal_, d_yaw_goal_, 0.0);
-            }
+            end_p_.col(i) = feet_end_calc_.calcFootPos(i, vxy_goal_, d_yaw_goal_, wave_generator_->phase_(i));
             feet_pos.col(i) = getFootPos(i);
             feet_vel.col(i) = getFootVel(i);
         }
     }
-    prev_contact_ = wave_generator_->contact_;
 }
 
 void GaitGenerator::restart() {
     first_run_ = true;
     vxy_goal_.setZero();
-    prev_contact_.setZero();
     feet_end_calc_.init();
 }
 

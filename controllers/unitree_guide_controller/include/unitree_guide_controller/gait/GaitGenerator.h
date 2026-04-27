@@ -76,7 +76,6 @@ private:
     double d_yaw_goal_{};
     Vec34 start_p_, end_p_, ideal_p_, past_p_;
     bool first_run_;
-    VecInt4 prev_contact_;
 };
 
 

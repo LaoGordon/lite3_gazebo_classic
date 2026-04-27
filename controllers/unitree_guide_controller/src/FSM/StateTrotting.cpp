@@ -135,7 +135,7 @@ void StateTrotting::calcTau() {
 
     d_wbd(0) = saturation(d_wbd(0), Vec2(-40, 40));
     d_wbd(1) = saturation(d_wbd(1), Vec2(-40, 40));
-    d_wbd(2) = saturation(d_wbd(2), Vec2(-40, 40));
+    d_wbd(2) = saturation(d_wbd(2), Vec2(-10, 10));
 
     const Vec34 pos_feet_body_global = estimator_->getFeetPos2Body();
     Vec34 force_feet_global =

@@ -13,7 +13,7 @@ FeetEndCalc::FeetEndCalc(CtrlComponent &ctrl_component)
       estimator_(ctrl_component.estimator_) {
     k_x_ = 0.005;
     k_y_ = 0.005;
-    k_yaw_ = 0.05;
+    k_yaw_ = 0.005;
 }
 
 void FeetEndCalc::init() {

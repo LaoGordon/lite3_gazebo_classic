@@ -2,6 +2,9 @@
 // Created by tlab-uav on 24-9-16.
 //
 
+#include <fstream>
+#include <limits>
+
 #include "unitree_guide_controller/control/BalanceCtrl.h"
 
 #include <unitree_guide_controller/common/mathTools.h>
@@ -140,7 +143,22 @@ void BalanceCtrl::solveQP() {
         ci0[i] = ci0_[i];
     }
 
-    solve_quadprog(G, g0, CE, ce0, CI, ci0, x);
+    const double result = solve_quadprog(G, g0, CE, ce0, CI, ci0, x);
+
+    {
+        static int fail_count = 0;
+        static int iter_count = 0;
+        iter_count++;
+        if (fail_count > 0 || iter_count == 1 || iter_count % 5000 == 0) {
+            std::ofstream qp_log("/tmp/qp_fail.log");
+            qp_log << "QP: fail=" << fail_count << " iter=" << iter_count
+                    << " (" << (100.0 * fail_count / iter_count) << "%)" << std::endl;
+        }
+        if (result == std::numeric_limits<double>::infinity()) {
+            fail_count++;
+            return;
+        }
+    }
 
     for (int i = 0; i < n; ++i) {
         F_[i] = x[i];
