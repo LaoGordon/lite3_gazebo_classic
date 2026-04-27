@@ -13,19 +13,18 @@ FeetEndCalc::FeetEndCalc(CtrlComponent &ctrl_component)
       estimator_(ctrl_component.estimator_) {
     k_x_ = 0.005;
     k_y_ = 0.005;
-    k_yaw_ = 0.005;
+    k_yaw_ = 0.05;
 }
 
 void FeetEndCalc::init() {
     t_stance_ = ctrl_component_.wave_generator_->get_t_stance();
     t_swing_ = ctrl_component_.wave_generator_->get_t_swing();
 
-    Vec34 feet_pos_body = estimator_->getFeetPos2Body();
-    // Vec34 feet_pos_body = robot_model_.feet_pos_normal_stand_;
+    std::vector<KDL::Frame> foot_poses = robot_model_->getFeet2BPositions();
     for (int i(0); i < 4; ++i) {
         feet_radius_(i) =
-                sqrt(pow(feet_pos_body(0, i), 2) + pow(feet_pos_body(1, i), 2));
-        feet_init_angle_(i) = atan2(feet_pos_body(1, i), feet_pos_body(0, i));
+                sqrt(pow(foot_poses[i].p[0], 2) + pow(foot_poses[i].p[1], 2));
+        feet_init_angle_(i) = atan2(foot_poses[i].p[1], foot_poses[i].p[0]);
     }
 }
 

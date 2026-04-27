@@ -66,7 +66,7 @@ public:
         const std::vector<KDL::Vector> feet_vel = robot_model_->getFeet2BVelocities();
         Vec34 result;
         for (int i(0); i < 4; ++i) {
-            result.col(i) = Vec3(feet_vel[i].data) + getVelocity();
+            result.col(i) = rotation_ * Vec3(feet_vel[i].data) + getVelocity();
         }
         return result;
     }

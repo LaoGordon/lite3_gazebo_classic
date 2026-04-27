@@ -37,15 +37,20 @@ auto WaveGenerator::update() -> void {
     calcWave(phase_, contact_, status_);
 
     if (status_ != status_past_) {
-        if (switch_status_.sum() == 0) {
-            switch_status_.setOnes();
-        }
-        calcWave(phase_past_, contact_past_, status_past_);
+        if (status_ == WaveStatus::WAVE_ALL && status_past_ == WaveStatus::STANCE_ALL) {
+            status_past_ = status_;
+            switch_status_.setZero();
+        } else {
+            if (switch_status_.sum() == 0) {
+                switch_status_.setOnes();
+            }
+            calcWave(phase_past_, contact_past_, status_past_);
 
-        if (status_ == WaveStatus::STANCE_ALL && status_past_ == WaveStatus::SWING_ALL) {
-            contact_past_.setOnes();
-        } else if (status_ == WaveStatus::SWING_ALL && status_past_ == WaveStatus::STANCE_ALL) {
-            contact_past_.setZero();
+            if (status_ == WaveStatus::STANCE_ALL && status_past_ == WaveStatus::SWING_ALL) {
+                contact_past_.setOnes();
+            } else if (status_ == WaveStatus::SWING_ALL && status_past_ == WaveStatus::STANCE_ALL) {
+                contact_past_.setZero();
+            }
         }
     }
 
