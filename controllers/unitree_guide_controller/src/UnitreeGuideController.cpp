@@ -224,12 +224,12 @@ namespace unitree_guide_controller
         state_list_.trotting = std::make_shared<StateTrotting>(ctrl_interfaces_, ctrl_component_);
 
         // Initialize FSM
-        current_state_ = state_list_.passive;
+        current_state_ = state_list_.fixedDown;
         current_state_->enter();
         next_state_ = current_state_;
         next_state_name_ = current_state_->state_name;
         mode_ = FSMMode::NORMAL;
-        ctrl_interfaces_.motion_command_.requested_state_ = FSMStateName::PASSIVE;
+        ctrl_interfaces_.motion_command_.requested_state_ = FSMStateName::FIXEDDOWN;
         ctrl_interfaces_.motion_command_.reset_twist();
 
         return CallbackReturn::SUCCESS;
